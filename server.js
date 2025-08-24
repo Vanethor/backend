@@ -9,7 +9,7 @@ app.use(cors()); // Permitir peticiones desde otros dominios
 app.use(express.json()); // Permitir recibir JSON en las peticiones
 // Middleware para logging (registrar todas las peticiones)
 app.use((req, res, next) => {
-console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+console.log(${new Date().toISOString()} - ${req.method} ${req.path});
 next();
 });
 // RUTAS DE AUTENTICACIÓN
@@ -26,7 +26,8 @@ const query = `INSERT INTO users (username, password) VALUES ('${username}',
 '${password}')`;
 db.run(query, function(err) {
 if (err) {
-// VULNERABILIDAD DELIBERADA: Exposición de información sensible
+// VULNERABILIDAD DELIBERADA: 
+Exposición de información sensible
 console.error('Error en registro:', err);
 return res.status(500).json({
 error: 'Error al registrar usuario',
@@ -46,23 +47,26 @@ const { username, password } = req.body;
 if (!username || !password) {
 return res.status(400).json({ error: 'Usuario y contraseña son requeridos' });
 }
-// VULNERABILIDAD DELIBERADA: SQL Injection
+// VULNERABILIDAD DELIBERADA: SQL
+Injection
 // Un atacante podría usar: admin' OR '1'='1' --
-const query = `SELECT * FROM users WHERE username = '${username}' AND password =
-'${password}'`;
-db.get(query, (err, user) => {
-if (err) {
-console.error('Error en login:', err);
-return res.status(500).json({
-error: 'Error en el servidor',
-details: err.message,
-query: query
-});
-}
-if (!user) {
-return res.status(401).json({ error: 'Credenciales inválidas' });
-}
-// VULNERABILIDAD DELIBERADA: Exposición de contraseña
+//const query = SELECT * FROM users WHERE username = '${username}' AND password ='${password}';
+const query = "SELECT * FROM users WHERE username = ? AND password =?";
+    db.get(query, [username, password], (err, user) => { 
+        if (err) { 
+            console.error('Error en login:', err); 
+            return res.status(500).json({  
+                error: 'Error en el servidor', 
+                details: err.message, 
+                query: query 
+            }); 
+        } 
+        
+        if (!user) { 
+            return res.status(401).json({ error: 'Credenciales inválidas' }); 
+        }
+// VULNERABILIDAD DELIBERADA:
+Exposición de contraseña
 res.json({
 message: 'Login exitoso',
 user: {
@@ -80,7 +84,8 @@ const { user_id } = req.query;
 if (!user_id) {
 return res.status(400).json({ error: 'user_id es requerido' });
 }
-// VULNERABILIDAD DELIBERADA: IDOR (Insecure Direct Object Reference)
+// VULNERABILIDAD DELIBERADA: IDOR
+(Insecure Direct Object Reference)
 // No verificamos si el usuario actual puede ver estas tareas
 const query = `SELECT * FROM tasks WHERE user_id = ${user_id} ORDER BY created_at
 DESC`;
@@ -102,7 +107,8 @@ const { title, description, user_id } = req.body;
 if (!title || !user_id) {
 return res.status(400).json({ error: 'Título y user_id son requeridos' });
 }
-// VULNERABILIDAD DELIBERADA: SQL Injection
+// VULNERABILIDAD DELIBERADA: SQL 
+Injection
 const query = `INSERT INTO tasks (title, description, user_id) VALUES ('${title}',
 '${description || ''}', ${user_id})`;
 db.run(query, function(err) {
@@ -126,7 +132,7 @@ const taskId = req.params.id;
 const { completed } = req.body;
 // VULNERABILIDAD DELIBERADA: IDOR
 // No verificamos si el usuario actual puede modificar esta tarea
-const query = `UPDATE tasks SET completed = ${completed ? 1 : 0} WHERE id = ${taskId}`;
+const query = UPDATE tasks SET completed = ${completed ? 1 : 0} WHERE id = ${taskId};
 db.run(query, function(err) {
 if (err) {
 console.error('Error actualizando tarea:', err);
@@ -147,7 +153,7 @@ app.delete('/api/tasks/:id', (req, res) => {
 const taskId = req.params.id;
 // VULNERABILIDAD DELIBERADA: IDOR
 // No verificamos si el usuario actual puede eliminar esta tarea
-const query = `DELETE FROM tasks WHERE id = ${taskId}`;
+const query = DELETE FROM tasks WHERE id = ${taskId};
 db.run(query, function(err) {
 if (err) {
 console.error('Error eliminando tarea:', err);
@@ -163,7 +169,8 @@ return res.status(404).json({ error: 'Tarea no encontrada' });
 res.json({ message: 'Tarea eliminada exitosamente' });
 });
 });
-// Middleware de manejo de errores global
+// Middleware de manejo de errores 
+global
 app.use((error, req, res, next) => {
 console.error('Error no manejado:', error);
 // VULNERABILIDAD DELIBERADA: Exposición de stack trace
@@ -179,7 +186,7 @@ async function startServer() {
 try {
 await initializeDatabase();
 app.listen(PORT, () => {
-console.log(`Servidor corriendo en http://localhost:${PORT}`);
+console.log(Servidor corriendo en http://localhost:${PORT});
 console.log('¡Aplicación lista para usar!');
 });
 } catch (error) {
